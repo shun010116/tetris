@@ -147,6 +147,7 @@ public class GameEngine {
                 break;
         }
 
+        // 난이도에 따라 레벨 상승 폭 변화
         SettingsManager settings = SettingsManager.getInstance();
         String difficulty = settings.getDifficulty();
         int linesPerLevel;

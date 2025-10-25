@@ -18,6 +18,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import java.util.ResourceBundle;
 
+/**
+ * Controls the main game screen's UI and game loop.
+ * This class is responsible for rendering the game board, pieces, and updating UI elements like score.
+ */
 public class GameScreenController implements Initializable {
 
     @FXML
@@ -42,31 +46,38 @@ public class GameScreenController implements Initializable {
     private long lastUpdateTime = 0;
     private long fallSpeed = 1_000_000_000; // 1 second in nanoseconds
 
-    // 블록 크기와 색상 설정 (ColorBlind Safe 팔레트)
+    /** The size of each block in pixels. */
     private static final int BLOCK_SIZE = 25;
+    /** The color palette for different Tetris pieces, designed to be colorblind-safe. */
     private static final Color[] PIECE_COLORS = {
         Color.BLACK,                    
-        Color.web("#56B4E9"),          // 1 - I 피스 (하늘색)
-        Color.web("#F0E442"),          // 2 - O 피스 (노랑)
-        Color.web("#CC79A7"),          // 3 - T 피스 (핑크/보라)
-        Color.web("#009E73"),          // 4 - S 피스 (초록)
-        Color.web("#D55E00"),          // 5 - Z 피스 (적갈색)
-        Color.web("#0072B2"),          // 6 - J 피스 (파랑)
-        Color.web("#E69F00")           // 7 - L 피스 (주황)
+        Color.web("#56B4E9"),          // 1 - I piece (Sky Blue)
+        Color.web("#F0E442"),          // 2 - O piece (Yellow)
+        Color.web("#CC79A7"),          // 3 - T piece (Pink/Purple)
+        Color.web("#009E73"),          // 4 - S piece (Green)
+        Color.web("#D55E00"),          // 5 - Z piece (Reddish-brown)
+        Color.web("#0072B2"),          // 6 - J piece (Blue)
+        Color.web("#E69F00")           // 7 - L piece (Orange)
     };
 
-    // 접근성 심볼 (0은 빈칸)
+    /** Symbols used for accessibility mode to represent different pieces. */
     private static final String[] PIECE_SYMBOLS = {
         " ", // 0
-        "O", // 1 - I (직선 형태를 텍스트로 대체)
+        "O", // 1 - I
         "●", // 2 - O
         "★", // 3 - T
         "▲", // 4 - S
         "■", // 5 - Z
-        "◆", // 6 - J (다이아몬드)
-        "◇"  // 7 - L (빈 다이아몬드)
+        "◆", // 6 - J
+        "◇"  // 7 - L
     };
 
+    /**
+     * Initializes the controller class. This method is automatically called
+     * after the FXML file has been loaded.
+     * @param location The location used to resolve relative paths for the root object, or null if the location is not known.
+     * @param resources The resources used to localize the root object, or null if the root object was not localized.
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // 설정 매니저 초기화
@@ -90,10 +101,17 @@ public class GameScreenController implements Initializable {
         gameEngine.startGame();
     }
 
+    /**
+     * Sets the scene manager for this controller.
+     * @param sceneManager The scene manager to use.
+     */
     public void setSceneManager(SceneManager sceneManager) {
         this.sceneManager = sceneManager;
     }
 
+    /**
+     * Sets up the main game canvas dimensions.
+     */
     private void setupGameCanvas() {
         if (gameCanvas != null) {
             gameCanvas.setWidth(GameBoard.BOARD_WIDTH * BLOCK_SIZE);
@@ -103,6 +121,9 @@ public class GameScreenController implements Initializable {
         }
     }
     
+    /**
+     * Sets up the key event handler for the scene.
+     */
     public void setupKeyHandler() {
         // Scene에 키 이벤트 핸들러 등록
         if (gameCanvas != null && gameCanvas.getScene() != null) {
@@ -117,6 +138,9 @@ public class GameScreenController implements Initializable {
         }
     }
 
+    /**
+     * Sets up the canvas for displaying the next piece.
+     */
     private void setupNextPieceCanvas() {
         if (nextPieceCanvas != null) {
             nextPieceCanvas.setWidth(6 * BLOCK_SIZE);
@@ -126,6 +150,9 @@ public class GameScreenController implements Initializable {
         }
     }
     
+    /**
+     * Draws a border around the next piece canvas.
+     */
     private void drawNextPieceCanvasBorder() {
         if (nextPieceCanvas != null) {
             GraphicsContext gc = nextPieceCanvas.getGraphicsContext2D();
@@ -135,6 +162,9 @@ public class GameScreenController implements Initializable {
         }
     }
 
+    /**
+     * Starts the main game loop using an AnimationTimer.
+     */
     private void startGameLoop() {
         gameLoop = new AnimationTimer() {
             @Override
@@ -166,11 +196,16 @@ public class GameScreenController implements Initializable {
         gameLoop.start();
     }
 
-    // 블록 낙하 속도 조절
+    /**
+     * Updates the fall speed of the pieces based on the current level.
+     */
     private void updateFallSpeed() {
         fallSpeed = (long) (1_000_000_000 / (1 + 0.1 * gameEngine.getLevel()));
     }
 
+    /**
+     * Renders the entire game state, including the board and the current piece.
+     */
     private void renderGame() {
         if (gameCanvas == null || gameEngine == null) return;
 
@@ -201,6 +236,9 @@ public class GameScreenController implements Initializable {
         renderBorder(gc);
     }
 
+    /**
+     * Renders the next piece in its dedicated canvas.
+     */
     private void renderNextPiece() {
         if (nextPieceCanvas == null || gameEngine == null) return;
 
@@ -228,6 +266,11 @@ public class GameScreenController implements Initializable {
         drawNextPieceCanvasBorder();
     }
 
+    /**
+     * Renders a single Tetris piece on the canvas.
+     * @param gc The graphics context to draw on.
+     * @param piece The piece to render.
+     */
     private void renderPiece(GraphicsContext gc, Piece piece) {
         int[][] shape = piece.getShape();
         Color color = PIECE_COLORS[piece.getType()];
@@ -245,6 +288,14 @@ public class GameScreenController implements Initializable {
         }
     }
 
+    /**
+     * Renders a single block, either with color or with an accessibility symbol.
+     * @param gc The graphics context to draw on.
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @param color The color of the block.
+     * @param pieceType The type of the piece, used for accessibility symbols.
+     */
     private void renderBlock(GraphicsContext gc, int x, int y, Color color, int pieceType) {
         // 접근성 모드가 켜져 있으면 색 대신 심볼로 채운다
         if (settingsManager != null && settingsManager.isAccessibilityModeEnabled()) {
@@ -252,14 +303,9 @@ public class GameScreenController implements Initializable {
             gc.setFill(Color.BLACK);
             gc.fillRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
 
-            String symbol = "?";
-            if (pieceType >= 0 && pieceType < PIECE_SYMBOLS.length) {
-                symbol = PIECE_SYMBOLS[pieceType];
-            }
+            String symbol = (pieceType >= 0 && pieceType < PIECE_SYMBOLS.length) ? PIECE_SYMBOLS[pieceType] : "?";
 
-            // 아이콘을 블록 크기에 맞게 최대한 크게 설정
-            int fontSize = BLOCK_SIZE - 2;
-            if (fontSize < 8) fontSize = 8;
+            int fontSize = Math.max(8, BLOCK_SIZE - 2);
             Font font = Font.font("Monospaced", fontSize);
             gc.setFont(font);
             gc.setFill(Color.WHITE);
@@ -286,8 +332,10 @@ public class GameScreenController implements Initializable {
         gc.strokeRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
     }
     
-    
-
+    /**
+     * Renders the border of the main game canvas.
+     * @param gc The graphics context to draw on.
+     */
     private void renderBorder(GraphicsContext gc) {
         // 접근성 모드에서도 게임 보드 외곽 테두리 표시
         gc.setStroke(Color.WHITE);
@@ -295,6 +343,9 @@ public class GameScreenController implements Initializable {
         gc.strokeRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
     }
 
+    /**
+     * Updates all UI labels (score, level, lines).
+     */
     private void updateUI() {
         if (gameEngine != null) {
             updateScore(gameEngine.getScore());
@@ -303,6 +354,9 @@ public class GameScreenController implements Initializable {
         }
     }
 
+    /**
+     * Handles the pause button click event.
+     */
     @FXML
     private void onPause() {
         if (gameEngine != null) {
@@ -310,6 +364,9 @@ public class GameScreenController implements Initializable {
         }
     }
 
+    /**
+     * Handles the "Back to Menu" button click event.
+     */
     @FXML
     private void onBackToMenu() {
         if (gameLoop != null) {
@@ -323,24 +380,39 @@ public class GameScreenController implements Initializable {
         }
     }
 
+    /**
+     * Updates the score label.
+     * @param score The new score.
+     */
     public void updateScore(int score) {
         if (scoreLabel != null) {
             scoreLabel.setText("Score: " + score);
         }
     }
 
+    /**
+     * Updates the level label.
+     * @param level The new level.
+     */
     public void updateLevel(int level) {
         if (levelLabel != null) {
             levelLabel.setText("Level: " + level);
         }
     }
 
+    /**
+     * Updates the lines cleared label.
+     * @param lines The new number of lines cleared.
+     */
     public void updateLines(int lines) {
         if (linesLabel != null) {
             linesLabel.setText("Lines: " + lines);
         }
     }
 
+    /**
+     * Shows the game over screen.
+     */
     public void showGameOver() {
         if (sceneManager != null) {
             int finalScore = gameEngine.getScore();
